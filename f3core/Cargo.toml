@@ -1,0 +1,10 @@
+[package]
+name = "f3core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap    = "4.5"
+crossterm = "0.29"
+fs = "0.0.5"
+log = "0.4.23"
