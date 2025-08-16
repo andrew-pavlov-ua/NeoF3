@@ -4,13 +4,9 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use tempfile::tempfile;
 
-use f3write::{
-    *
-};
+use f3write::*;
 
-use f3core::{
-    flow::{DynamicBuffer, Flow},
-};
+use f3core::flow::{DynamicBuffer, Flow};
 
 const SECTOR_SIZE: usize = 512;
 
@@ -23,7 +19,7 @@ fn test_fill_buffer_sector() {
     assert_eq!(off1, off0 + SECTOR_SIZE as u64);
     let first = u64::from_ne_bytes(buf[0..8].try_into().unwrap());
     assert_eq!(first, off0);
-} 
+}
 
 #[test]
 fn test_write_chunk_and_read_back() {
@@ -50,7 +46,7 @@ fn integration_create_one_sector() {
     let p = dir.path().to_str().unwrap();
 
     let mut flow = Flow::new(512, -1, false);
-    let stop = create_and_fill_file(p,  1, 512, false, &mut flow);
+    let stop = create_and_fill_file(p, 1, 512, false, &mut flow);
     assert!(stop.is_ok(), "Failed to create and fill file");
 
     let meta = std::fs::metadata(format!("{}/1.h2w", p)).unwrap();

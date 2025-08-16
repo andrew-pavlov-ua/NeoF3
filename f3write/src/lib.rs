@@ -1,20 +1,25 @@
-// f3-write/src/lib.rs
+// f3write/src/lib.rs
 
-use std::{
-    fs::{File, OpenOptions}, io::{self, ErrorKind, Write}, process, io::Result, time::Instant,
-};
 use std::ffi::CString;
-
-use crossterm::{
-    execute, terminal::{Clear, ClearType},
-    cursor::{MoveToColumn},
+use std::{
+    fs::{File, OpenOptions},
+    io::Result,
+    io::{self, ErrorKind, Write},
+    process,
+    time::Instant,
 };
+
 use bytesize::GIB;
+use crossterm::{
+    cursor::MoveToColumn,
+    execute,
+    terminal::{Clear, ClearType},
+};
 use nix::sys::statvfs::statvfs;
 
 use f3core::{
     flow::{DynamicBuffer, Flow},
-    utils::{adjust_unit, random_number, pr_time_str, SECTOR_SIZE},
+    utils::{SECTOR_SIZE, adjust_unit, pr_time_str, random_number},
 };
 
 /// Internal helper: query filesystem free space (in bytes) for given path.
@@ -98,9 +103,7 @@ pub fn create_and_fill_file(
         .truncate(true)
         .open(&full)
     {
-        Ok(mut file) => {
-            fill_file(&mut file, number, size, fw)
-        }
+        Ok(mut file) => fill_file(&mut file, number, size, fw),
         Err(e) if e.raw_os_error() == Some(28) => {
             // ENOSPC
             println!("No space left.");
@@ -118,7 +121,7 @@ pub fn create_and_fill_file(
 fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Result<()> {
     let mut dbuf = DynamicBuffer::new();
     let mut offset = number as u64 * GIB;
-    let mut remaining = size as usize;
+    let mut remaining = size;
 
     fw.start_measurement();
     while remaining > 0 {
@@ -126,7 +129,7 @@ fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Resu
         if chunk_size > remaining {
             chunk_size = remaining;
         }
-        if let Err(e) = write_chunk(&mut dbuf, file, chunk_size, &mut offset) {
+        if let Err(e) = write_chunk(&mut dbuf, file, chunk_size as usize, &mut offset) {
             if e.raw_os_error() == Some(28) {
                 // ENOSPC
                 // println!("No space left while writing file: {}.h2w", number);
@@ -138,7 +141,10 @@ fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Resu
         }
         remaining -= chunk_size;
 
-        if let Err(e) = fw.measure(&file, chunk_size as i64) && e.kind() == ErrorKind::Other && e.raw_os_error() == Some(28) {
+        if let Err(e) = fw.measure(&file, chunk_size as i64)
+            && e.kind() == ErrorKind::Other
+            && e.raw_os_error() == Some(28)
+        {
             eprintln!("Error during measurement: {}", e);
             return Err(e);
         }
@@ -146,7 +152,6 @@ fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Resu
     fw.end_measurement(&file)?;
 
     Ok(())
-
 }
 
 /// Top‐level: fill the filesystem at `path` with numbered .h2w files from `start_at`
@@ -182,11 +187,7 @@ pub fn fill_fs(
     for n in start_at..=*end_at {
         let stop = create_and_fill_file(path, n, GIB, show_progress, &mut flow).is_err();
 
-        execute!(
-            io::stdout(),
-            Clear(ClearType::CurrentLine),
-            MoveToColumn(0),
-        ).unwrap();
+        execute!(io::stdout(), Clear(ClearType::CurrentLine), MoveToColumn(0),).unwrap();
 
         if stop {
             break;
@@ -207,5 +208,8 @@ pub fn fill_fs(
         }
     }
 
-    println!("Total elapsed: {:.2?}", pr_time_str(start_time.elapsed().as_secs_f64()));
+    println!(
+        "Total elapsed: {:.2?}",
+        pr_time_str(start_time.elapsed().as_secs_f64())
+    );
 }

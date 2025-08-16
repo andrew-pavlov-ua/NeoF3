@@ -389,12 +389,23 @@ dependencies = [
  "clap",
  "crossterm",
  "fs",
+ "libc",
  "log",
+ "simple-log",
 ]
 
 [[package]]
 name = "f3read"
 version = "0.1.0"
+dependencies = [
+ "bytesize",
+ "clap",
+ "crossterm",
+ "f3core",
+ "libc",
+ "log",
+ "simple-log",
+]
 
 [[package]]
 name = "f3write"
