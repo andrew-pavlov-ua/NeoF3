@@ -7,7 +7,7 @@ pub const SECTOR_SIZE: usize = 512;
 pub fn print_header(name: &str) {
     let version = env!("CARGO_PKG_VERSION");
     println!(
-        "F3 {}: A tool to write files to a device or file system",
+        "F3 {}: A tool to check file system conditions",
         name
     );
     println!("Usage: F3 {} [OPTIONS]", name);
