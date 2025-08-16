@@ -1,9 +1,5 @@
 use std::{
-    cmp::min,
-    fs::File,
-    io::{self, ErrorKind, Read, Result, Write},
-    time::Instant,
-    u8, usize,
+    cmp::min, fs::File, io::{self, ErrorKind, Read, Result, Write}, time::Instant, u8, usize
 };
 
 use bytesize::GIB;
@@ -210,7 +206,7 @@ fn get_total_size(files: &Vec<i64>) -> u64 {
 }
 
 fn report(prefix: &str, i: u64) {
-    let (size, unit) = adjust_unit(i as f64);
+    let (size, unit) = adjust_unit((i * SECTOR_SIZE as u64) as f64);
     println!("{}: {} {}", prefix, size, unit);
 }
 

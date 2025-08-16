@@ -16,4 +16,5 @@ log = "0.4.27"
 crossterm = "0.29"
 
 [[bin]]
-name = "f3write"
+name = "f3rs_write"
+path = "src/main.rs" 

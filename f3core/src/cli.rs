@@ -42,9 +42,6 @@ impl CommonArgs {
             eprintln!("Error: Device path must be specified.");
             process::exit(1);
         }
-        if !self.dev_path.ends_with("/") {
-            self.dev_path.push('/');
-        }
         if self.start_at < 1 {
             eprintln!("Error: Start at must be greater than or equal to 1");
             process::exit(1);
@@ -83,6 +80,9 @@ impl WriteArgs {
             eprintln!("Error: Max write rate must be non-negative");
             process::exit(1);
         }
+        if !self.common.dev_path.ends_with("/") {
+            self.common.dev_path.push('/');
+        }
     }
 }
 
@@ -104,6 +104,14 @@ pub struct ReadArgs {
         default_value_t = 0
     )]
     pub max_read_rate: i64,
+
+    /// Should program read a single file
+    #[arg(
+        short = 'S',
+        long = "read-single-file",
+        default_value_t = false
+    )]
+    pub read_single_file: bool,
 }
 
 impl ReadArgs {
@@ -112,6 +120,13 @@ impl ReadArgs {
         if self.max_read_rate < 0 {
             eprintln!("Error: Max read rate must be non-negative");
             process::exit(1);
+        }
+        if self.common.dev_path.ends_with(".h2w") {
+            self.read_single_file = true;
+            return;
+        }
+        if !self.common.dev_path.ends_with("/") {
+            self.common.dev_path.push('/');
         }
     }
 }

@@ -1,10 +1,10 @@
 // f3-write/tests/write_tests.rs
 
+use crate::*;
+
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use tempfile::tempfile;
-
-use f3write::*;
 
 use f3core::flow::{DynamicBuffer, Flow};
 

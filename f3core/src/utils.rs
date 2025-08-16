@@ -140,3 +140,20 @@ pub fn fadvise_sequential(file: &File) -> Result<()> {
 
     Ok(())
 }
+
+pub fn parse_dev_and_num(full: &str) -> Option<(&str, i32)> {
+    let name = full.strip_suffix(".h2w")?;
+
+    // Searching fo nums start
+    let mut i = name.len();
+    while i > 0 && name.as_bytes()[i - 1].is_ascii_digit() {
+        i -= 1;
+    }
+    if i == name.len() {
+        return None; // No filename number
+    }
+
+    let num: i32 = name[i..].parse().ok()?;
+    let dev_path = &name[..i]; 
+    Some((dev_path, num))
+}

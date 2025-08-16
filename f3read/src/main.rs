@@ -4,8 +4,8 @@ use clap::Parser;
 
 // --- internal modules ---
 use f3core::{
-    cli::ReadArgs,
-    utils::{self, adjust_dev_path, ls_my_files},
+    cli::{ReadArgs},
+    utils::{self, adjust_dev_path, ls_my_files, parse_dev_and_num},
 };
 use f3read::*;
 
@@ -18,6 +18,13 @@ fn main() {
 
     // Display header
     utils::print_header("read");
+
+    if args.read_single_file {
+        let (dev_path, file_num) = parse_dev_and_num(&args.common.dev_path).unwrap();
+        args.common.start_at = file_num as i64;
+        args.common.end_at = file_num as i64;
+        args.common.dev_path = dev_path.to_string();
+    }
 
     adjust_dev_path(&mut args.common.dev_path);
 
