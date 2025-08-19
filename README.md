@@ -3,7 +3,7 @@
 A fast Rust tool to **verify files/paths** created by F3-like write tools and detect data issues.  
 It scans in sectors and reports how many sectors are **ok**, **changed**, **overwritten**, or **corrupted**, plus speed and ETA.
 
-> This workspace also contains `f3write` (optional). Binaries are installed as **`f3rs_read`** (and optionally **`f3rs_write`**) via `[[bin]].name` in each package.
+> This workspace also contains `f3write`. Binaries are installed as **`f3rs_read`** and **`f3rs_write`** via `[[bin]].name` in each package.
 
 ---
 
