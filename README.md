@@ -1,9 +1,9 @@
-# f3rs_read
+# nf3_read
 
 A fast Rust tool to **verify files/paths** created by F3-like write tools and detect data issues.  
 It scans in sectors and reports how many sectors are **ok**, **changed**, **overwritten**, or **corrupted**, plus speed and ETA.
 
-> This workspace also contains `f3write`. Binaries are installed as **`f3rs_read`** and **`f3rs_write`** via `[[bin]].name` in each package.
+> This workspace also contains `f3write`. Binaries are installed as **`nf3_read`** and **`f3rs_write`** via `[[bin]].name` in each package.
 
 ---
 
@@ -12,14 +12,14 @@ It scans in sectors and reports how many sectors are **ok**, **changed**, **over
 From the workspace root:
 
 ```bash
-# Installing f3rs_write and f3rs_read
+# Installing f3rs_write and nf3_read
 make install
 ```
 
 Verify:
 ```bash
-which f3rs_read
-f3rs_read --help
+which nf3_read
+nf3_read --help
 ```
 
 ---
@@ -27,19 +27,19 @@ f3rs_read --help
 ## Usage
 
 ```
-f3rs_read [OPTIONS] <PATH>...
+nf3_read [OPTIONS] <PATH>...
 ```
 
 Examples:
 ```bash
 # Validate all .h2w files in current directory
-f3rs_read .
+nf3_read .
 
 # Validate a specific file
-f3rs_read ./testfile.h2w
+nf3_read ./testfile.h2w
 
 # Validate a mounted path/device
-f3rs_read /mnt/usb1
+nf3_read /mnt/usb1
 ```
 
 Common options (if enabled in your build):
@@ -49,7 +49,7 @@ Common options (if enabled in your build):
 - `--no-progress` disable live progress
 - `-v` / `-q` verbosity
 
-Run `f3rs_read --help` for your exact list.
+Run `nf3_read --help` for your exact list.
 
 ---
 
@@ -87,11 +87,11 @@ cargo test -p f3core -- --nocapture --test-threads=1
 
 ```bash
 # Writer
-cargo run -p f3write --bin f3rs_write -- --help
+cargo run -p f3write --bin nf3_write -- --help
 
 # Reader
-cargo run -p f3read --bin f3rs_read -- --help
-cargo run -p f3read --bin f3rs_read -- .
+cargo run -p f3read --bin nf3_read -- --help
+cargo run -p f3read --bin nf3_read -- .
 
 ```
 
@@ -102,7 +102,7 @@ cargo run -p f3read --bin f3rs_read -- .
 Use standard `log` macros; initialize one logger once at startup. Example (env_logger):
 
 ```bash
-RUST_LOG=debug f3rs_read .
+RUST_LOG=debug nf3_read .
 ```
 
 ---
@@ -110,9 +110,9 @@ RUST_LOG=debug f3rs_read .
 ## Project layout
 
 ```
-f3rs/
+NeoF3/
   Cargo.toml          # [workspace]
   f3core/             # library crate with shared logic
-  f3read/             # reader binary (installs as `f3rs_read`)
+  f3read/             # reader binary (installs as `nf3_read`)
   f3write/            # writer binary (optional, installs as `f3rs_write`)
 ```
