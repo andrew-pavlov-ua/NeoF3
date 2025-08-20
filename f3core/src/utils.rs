@@ -84,7 +84,7 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
 
         if let Some(num_str) = file_name.strip_suffix(".h2w") {
             if let Ok(num) = num_str.parse::<i64>() {
-                if end_at == 0 || (num >= start_at && num <= end_at) {
+                if (end_at == 0 && num >= start_at) || (num >= start_at && num <= end_at) {
                     matched_files.push(num);
                 }
             }

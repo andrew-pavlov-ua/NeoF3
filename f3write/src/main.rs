@@ -1,10 +1,10 @@
 // --- std ---
-use std::fs::File;
+// use std::fs::File;
 
 // --- external crates ---
 use clap::Parser;
-use log::Level;
-use simple_log::LogConfigBuilder;
+// use log::Level;
+// use simple_log::LogConfigBuilder;
 
 // --- internal modules ---
 use f3core::{
@@ -15,17 +15,17 @@ use f3write::*;
 
 // Before running f3write, make sure your device is mounted!!
 fn main() {
-    File::create("f3write/f3write.log").expect("Failed to clear log file");
+    // File::create("f3write/f3write.log").expect("Failed to clear log file");
 
-    let log_config = LogConfigBuilder::builder()
-        .path("f3write/f3write.log")
-        .level(Level::Debug)
-        .expect("Failed to set log level")
-        .output_file()
-        .build();
+    // let log_config = LogConfigBuilder::builder()
+    //     .path("f3write/f3write.log")
+    //     .level(Level::Debug)
+    //     .expect("Failed to set log level")
+    //     .output_file()
+    //     .build();
 
-    simple_log::new(log_config).expect("Failed to initialize logging");
-    log::info!("Starting program");
+    // simple_log::new(log_config).expect("Failed to initialize logging");
+    // log::info!("Starting program");
 
     let mut args = WriteArgs::parse();
 

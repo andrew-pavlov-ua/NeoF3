@@ -14,5 +14,5 @@ crossterm = "0.29.0"
 
 
 [[bin]]
-name = "f3rs_read"
+name = "nf3_read"
 path = "src/main.rs" 
