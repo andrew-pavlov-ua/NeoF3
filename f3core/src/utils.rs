@@ -6,10 +6,7 @@ pub const SECTOR_SIZE: usize = 512;
 
 pub fn print_header(name: &str) {
     let version = env!("CARGO_PKG_VERSION");
-    println!(
-        "F3 {}: A tool to check file system conditions",
-        name
-    );
+    println!("F3 {}: A tool to check file system conditions", name);
     println!("Usage: F3 {} [OPTIONS]", name);
     println!("Version: {}", version);
     println!("This is free software; see the source for copying conditions.");
@@ -94,9 +91,7 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
 }
 
 fn can_delete(file: &str) -> bool {
-    fs::metadata(file)
-        .map(|m| !m.permissions().readonly())
-        .unwrap_or(false)
+    fs::metadata(file).map(|m| !m.permissions().readonly()).unwrap_or(false)
 }
 
 pub fn pr_time_str(mut sec: f64) -> String {
@@ -154,6 +149,6 @@ pub fn parse_dev_and_num(full: &str) -> Option<(&str, i32)> {
     }
 
     let num: i32 = name[i..].parse().ok()?;
-    let dev_path = &name[..i]; 
+    let dev_path = &name[..i];
     Some((dev_path, num))
 }

@@ -28,11 +28,7 @@ pub struct CommonArgs {
         help = "Show progress if NUM is not zero"
     )]
     pub show_progress: bool,
-    #[arg(
-        value_name = "PATH",
-        default_value = "",
-        help = "Path to the device or file to write"
-    )]
+    #[arg(value_name = "PATH", default_value = "", help = "Path to the device or file to write")]
     pub dev_path: String,
 }
 
@@ -64,12 +60,7 @@ pub struct WriteArgs {
     pub common: CommonArgs,
 
     /// Maximum write rate in KB/s (0 = unlimited)
-    #[arg(
-        short = 'w',
-        long = "max-write-rate",
-        value_name = "KB/s",
-        default_value_t = 0
-    )]
+    #[arg(short = 'w', long = "max-write-rate", value_name = "KB/s", default_value_t = 0)]
     pub max_write_rate: i64,
 }
 
@@ -97,20 +88,11 @@ pub struct ReadArgs {
     pub common: CommonArgs,
 
     /// Maximum read rate in KB/s (0 = unlimited)
-    #[arg(
-        short = 'r',
-        long = "max-read-rate",
-        value_name = "KB/s",
-        default_value_t = 0
-    )]
+    #[arg(short = 'r', long = "max-read-rate", value_name = "KB/s", default_value_t = 0)]
     pub max_read_rate: i64,
 
     /// Should program read a single file
-    #[arg(
-        short = 'S',
-        long = "read-single-file",
-        default_value_t = false
-    )]
+    #[arg(short = 'S', long = "read-single-file", default_value_t = false)]
     pub read_single_file: bool,
 }
 

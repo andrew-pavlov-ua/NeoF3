@@ -39,7 +39,6 @@ fn bump_words(sector: &mut [u8], word_indices: &[usize]) {
     }
 }
 
-
 fn assert_counts(s: &FileStats, ok: u64, corrupted: u64, changed: u64, overwritten: u64) {
     assert_eq!(s.secs_ok, ok, "secs_ok");
     assert_eq!(s.secs_corrupted, corrupted, "secs_corrupted");

@@ -4,7 +4,7 @@ use clap::Parser;
 
 // --- internal modules ---
 use f3core::{
-    cli::{ReadArgs},
+    cli::ReadArgs,
     utils::{self, adjust_dev_path, ls_my_files, parse_dev_and_num},
 };
 use f3read::*;
@@ -28,11 +28,7 @@ fn main() {
 
     adjust_dev_path(&mut args.common.dev_path);
 
-    let files = ls_my_files(
-        &args.common.dev_path,
-        args.common.start_at,
-        args.common.end_at,
-    );
+    let files = ls_my_files(&args.common.dev_path, args.common.start_at, args.common.end_at);
 
     match iterate_files(
         &args.common.dev_path,

@@ -42,10 +42,7 @@ pub fn print_freespace(path: &str) {
 pub fn fill_buffer(buf: &mut [u8], size: usize, offset: u64) -> u64 {
     let mut current = offset;
     assert!(size > 0, "buffer must not be empty");
-    assert!(
-        size % SECTOR_SIZE == 0,
-        "buffer size must be multiple of SECTOR_SIZE"
-    );
+    assert!(size % SECTOR_SIZE == 0, "buffer size must be multiple of SECTOR_SIZE");
 
     for chunk in buf.chunks_exact_mut(SECTOR_SIZE) {
         let mut prev = current;
@@ -97,12 +94,7 @@ pub fn create_and_fill_file(
     let full = format!("{}/{}.h2w", path, number);
     io::stdout().flush().unwrap();
 
-    match OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(&full)
-    {
+    match OpenOptions::new().create(true).write(true).truncate(true).open(&full) {
         Ok(mut file) => fill_file(&mut file, number, size, fw),
         Err(e) if e.raw_os_error() == Some(28) => {
             // ENOSPC
@@ -208,10 +200,7 @@ pub fn fill_fs(
         }
     }
 
-    println!(
-        "Total elapsed: {:.2?}",
-        pr_time_str(start_time.elapsed().as_secs_f64())
-    );
+    println!("Total elapsed: {:.2?}", pr_time_str(start_time.elapsed().as_secs_f64()));
 }
 
 #[cfg(test)]
