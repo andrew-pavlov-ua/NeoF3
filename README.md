@@ -13,10 +13,11 @@ From the workspace root:
 
 ```bash
 # Installing f3rs_write and nf3_read
-make install
+just install
 ```
 
 Verify:
+
 ```bash
 which nf3_read
 nf3_read --help
@@ -26,11 +27,12 @@ nf3_read --help
 
 ## Usage
 
-```
+```bash
 nf3_read [OPTIONS] <PATH>...
 ```
 
 Examples:
+
 ```bash
 # Validate all .h2w files in current directory
 nf3_read .
@@ -43,6 +45,7 @@ nf3_read /mnt/usb1
 ```
 
 Common options (if enabled in your build):
+
 - `--sector-size <BYTES>` (default: 512)
 - `--tolerance <N>` per-sector word mismatches allowed (default: 2)
 - `--rate <MiB/s>` soft I/O rate limit
@@ -55,7 +58,7 @@ Run `nf3_read --help` for your exact list.
 
 ## Output (at a glance)
 
-```
+```bash
 SECTORS      ok/corrupted/changed/overwritten
 Validating file: X.h2w ...  2097152/        0/       0/       0
 ...
@@ -72,11 +75,13 @@ Average speed: 49.42 MB/s
 ## Testing
 
 Unit tests (all workspace members):
+
 ```bash
 cargo test
 ```
 
 Show test output live and run single-threaded:
+
 ```bash
 cargo test -p f3core -- --nocapture --test-threads=1
 ```
@@ -109,7 +114,7 @@ RUST_LOG=debug nf3_read .
 
 ## Project layout
 
-```
+```bash
 NeoF3/
   Cargo.toml          # [workspace]
   f3core/             # library crate with shared logic
