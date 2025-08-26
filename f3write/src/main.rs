@@ -37,11 +37,7 @@ fn main() {
 
     utils::adjust_dev_path(&mut args.common.dev_path);
 
-    utils::unlink_old_files(
-        &args.common.dev_path,
-        args.common.start_at,
-        args.common.end_at,
-    );
+    utils::unlink_old_files(&args.common.dev_path, args.common.start_at, args.common.end_at);
     println!("Old files unlinked successfully.");
 
     fill_fs(

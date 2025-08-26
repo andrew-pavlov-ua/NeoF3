@@ -79,11 +79,13 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
         let entry = entry.unwrap();
         let file_name = entry.file_name().into_string().unwrap_or_default();
 
-        if let Some(num_str) = file_name.strip_suffix(".h2w") 
-            && let Ok(num) = num_str.parse::<i64>() 
-                && num >= start_at && (num <= end_at || end_at == 0) {
-                    matched_files.push(num);
-                }
+        if let Some(num_str) = file_name.strip_suffix(".h2w")
+            && let Ok(num) = num_str.parse::<i64>()
+            && num >= start_at
+            && (num <= end_at || end_at == 0)
+        {
+            matched_files.push(num);
+        }
     }
     matched_files
 }
