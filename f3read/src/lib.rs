@@ -3,7 +3,6 @@ use std::{
     fs::File,
     io::{self, ErrorKind, Read, Result, Write},
     time::Instant,
-    u8, usize,
 };
 
 use bytesize::GIB;
@@ -234,7 +233,7 @@ fn check_chunk(
             break;
         }
 
-        total_bytes_read += filled as isize;
+        total_bytes_read += filled;
         chunk_left -= filled as u64;
         *expected_offset =
             check_buffer(&buf[..filled as usize], filled as usize, *expected_offset, stats);
@@ -356,8 +355,6 @@ fn read_all(file: &mut File, buf: &mut [u8]) -> isize {
 //     stats.bytes_read += total_bytes_read as u64;
 //     total_bytes_read
 // }
-
-/// Tests
 
 #[cfg(test)]
 mod tests;

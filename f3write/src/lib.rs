@@ -103,7 +103,7 @@ pub fn create_and_fill_file(
         }
         Err(e) => {
             eprintln!("Error creating file {}: {}", full, e);
-            Err(io::Error::new(ErrorKind::Other, "Error creating file"))
+            Err(io::Error::other("Error creating file"))
         }
     }
 }
@@ -133,7 +133,7 @@ fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Resu
         }
         remaining -= chunk_size;
 
-        if let Err(e) = fw.measure(&file, chunk_size as i64)
+        if let Err(e) = fw.measure(file, chunk_size as i64)
             && e.kind() == ErrorKind::Other
             && e.raw_os_error() == Some(28)
         {
@@ -141,7 +141,7 @@ fn fill_file(file: &mut File, number: i64, size: u64, fw: &mut Flow) -> io::Resu
             return Err(e);
         }
     }
-    fw.end_measurement(&file)?;
+    fw.end_measurement(file)?;
 
     Ok(())
 }
@@ -187,7 +187,7 @@ pub fn fill_fs(
     }
 
     // Final report
-    print!("--------------------REPORT--------------------\n");
+    println!("--------------------REPORT--------------------");
     print_freespace(path);
     if flow.has_enough_measurements() {
         flow.pr_avg_speed();

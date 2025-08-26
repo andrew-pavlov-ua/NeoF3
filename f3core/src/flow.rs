@@ -13,6 +13,7 @@ use crossterm::{
     style::Print,
     terminal::{Clear, ClearType},
 };
+// use simple_log::new;
 
 // Internal crate imports
 use crate::utils::{adjust_unit, pr_time_str};
@@ -140,8 +141,8 @@ impl Flow {
     }
 
     pub fn get_remaining_chunk_size(&self) -> u64 {
-        assert!(self.blocks_per_delay as i64 > self.processed_blocks);
-        let left_blocks = (self.blocks_per_delay - self.processed_blocks as i64) as u64;
+        assert!(self.blocks_per_delay > self.processed_blocks);
+        let left_blocks = (self.blocks_per_delay - self.processed_blocks) as u64;
         left_blocks * self.block_size as u64
     }
 
@@ -327,7 +328,7 @@ impl Flow {
             }
             Steady => {
                 self.step = 1;
-                if delay <= self.delay_ms as u64 {
+                if delay <= self.delay_ms {
                     if inst_speed < self.max_process_rate {
                         self.state = Inc;
                         self.inc_step();
@@ -355,9 +356,16 @@ pub fn diff_in_us(t1: Instant, t2: Instant) -> u64 {
 }
 
 const DEFAULT_BUF_SIZE: usize = 2 * 1024 * 1024; // 2MB
+
 pub struct DynamicBuffer {
     buf: Vec<u8>,
     max_buf: bool,
+}
+
+impl Default for DynamicBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DynamicBuffer {

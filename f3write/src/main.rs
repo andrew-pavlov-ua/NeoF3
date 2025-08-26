@@ -39,8 +39,8 @@ fn main() {
 
     utils::unlink_old_files(
         &args.common.dev_path,
-        args.common.start_at as i64,
-        args.common.end_at as i64,
+        args.common.start_at,
+        args.common.end_at,
     );
     println!("Old files unlinked successfully.");
 

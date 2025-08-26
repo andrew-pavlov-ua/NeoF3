@@ -49,11 +49,11 @@ pub fn adjust_unit(bytes: f64) -> (f64, &'static str) {
 pub fn delay_ms(t1: Instant, t2: Instant) -> i64 {
     match t2.checked_duration_since(t1) {
         Some(d) => d.as_millis() as i64,
-        None => 0,
+        _none => 0,
     }
 }
 
-pub fn unlink_old_files(path: &String, start_at: i64, end_at: i64) {
+pub fn unlink_old_files(path: &str, start_at: i64, end_at: i64) {
     let files: Vec<i64> = ls_my_files(path, start_at, end_at);
 
     for file_num in files {
@@ -79,13 +79,11 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
         let entry = entry.unwrap();
         let file_name = entry.file_name().into_string().unwrap_or_default();
 
-        if let Some(num_str) = file_name.strip_suffix(".h2w") {
-            if let Ok(num) = num_str.parse::<i64>() {
-                if (end_at == 0 && num >= start_at) || (num >= start_at && num <= end_at) {
+        if let Some(num_str) = file_name.strip_suffix(".h2w") 
+            && let Ok(num) = num_str.parse::<i64>() 
+                && num >= start_at && (num <= end_at || end_at == 0) {
                     matched_files.push(num);
                 }
-            }
-        }
     }
     matched_files
 }
