@@ -3,5 +3,11 @@ install:
 	cargo install --path=./f3read
 	cargo install --path=./f3write
 
-read_test:
-	cargo test -p f3read -- --nocapture
+clippy:
+	cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+fmt:
+	cargo fmt --all -- --check
+
+test:
+	cargo test --workspace --all-features --no-fail-fast

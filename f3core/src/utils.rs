@@ -1,6 +1,11 @@
-use std::{env, fs, fs::File, io::Result, os::fd::AsRawFd, path::Path, process, time::Instant};
-
-// use log::debug;
+use std::{
+    env,
+    fs::{self, File},
+    io::Result,
+    path::Path,
+    process,
+    time::Instant,
+};
 
 pub const SECTOR_SIZE: usize = 512;
 
@@ -120,18 +125,40 @@ pub fn random_number(prv_number: u64) -> u64 {
     prv_number.wrapping_mul(4_294_967_311u64).wrapping_add(17)
 }
 
+#[rustfmt::skip]
 pub fn fadvise_dontneed(file: &File) -> Result<()> {
-    assert!(
-        unsafe { libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_DONTNEED,) } == 0
-    );
+    #[cfg(unix)]
+    {
+        use libc;
+        use std::os::fd::AsRawFd;
+
+        let rc = unsafe {
+            libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_DONTNEED)
+        };
+
+        if rc != 0 {
+            return Err(std::io::Error::from_raw_os_error(rc));
+        }
+    }
 
     Ok(())
 }
 
+#[rustfmt::skip]
 pub fn fadvise_sequential(file: &File) -> Result<()> {
-    assert!(
-        unsafe { libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_SEQUENTIAL,) } == 0
-    );
+    #[cfg(unix)]
+    {
+        use libc;
+        use std::os::fd::AsRawFd;
+
+        let rc = unsafe {
+            libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_SEQUENTIAL)
+        };
+
+        if rc != 0 {
+            return Err(std::io::Error::from_raw_os_error(rc));
+        }
+    }
 
     Ok(())
 }
