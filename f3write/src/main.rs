@@ -40,11 +40,14 @@ fn main() {
     utils::unlink_old_files(&args.common.dev_path, args.common.start_at, args.common.end_at);
     println!("Old files unlinked successfully.");
 
-    fill_fs(
+    match fill_fs(
         &args.common.dev_path,
         args.common.start_at,
         &mut args.common.end_at,
         args.max_write_rate,
         args.common.show_progress,
-    );
+    ) {
+        Ok(()) => (),
+        Err(e) => eprintln!("Error in main: {}", e),
+    }
 }

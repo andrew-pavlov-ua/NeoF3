@@ -15,7 +15,7 @@ use crossterm::{
     execute,
     terminal::{Clear, ClearType},
 };
-use nix::sys::statvfs::statvfs;
+use libc::statvfs;
 
 use f3core::{
     flow::{DynamicBuffer, Flow},
@@ -23,16 +23,52 @@ use f3core::{
 };
 
 /// Internal helper: query filesystem free space (in bytes) for given path.
-fn get_freespace(path: &str) -> u64 {
-    let c_path = CString::new(path).expect("CString::new failed");
-    let stat = statvfs(c_path.as_c_str()).expect("Failed to get filesystem stats");
-    stat.blocks_free() * stat.block_size() as u64
+#[cfg(unix)]
+fn get_freespace(path: &str) -> Result<u64> {
+    let cpath = CString::new(path).expect("CString::new failed");
+    let mut s: statvfs = unsafe { std::mem::zeroed() };
+    let rc = unsafe { libc::statvfs(cpath.as_ptr(), &mut s) };
+    if rc == 0 {
+        Ok(s.f_bavail * s.f_frsize) // bytes available to unprivileged
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+    // stat.blocks_free() * stat.block_size()
+}
+
+#[cfg(windows)]
+fn available_bytes_windows(path: &std::path::Path) -> std::io::Result<u64> {
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
+
+    let mut avail: u64 = 0;
+    let mut total: u64 = 0;
+    let mut free: u64 = 0;
+
+    // Path must end with a backslash for root (e.g., "C:\\")
+    let mut wide: Vec<u16> = path.as_os_str().encode_wide().chain([0]).collect();
+    let ok = unsafe {
+        GetDiskFreeSpaceExW(
+            wide.as_ptr(),
+            &mut avail as *mut u64,
+            &mut total as *mut u64,
+            &mut free as *mut u64,
+        )
+    };
+    if ok != 0 { Ok(avail) } else { Err(std::io::Error::last_os_error()) }
 }
 
 pub fn print_freespace(path: &str) {
-    let free_space = get_freespace(path) as f64;
-    let (free_space, unit) = adjust_unit(free_space);
-    println!("Free space available: {} {}", free_space, unit);
+    match get_freespace(path) {
+        Ok(free_space) => {
+            let (free_space, unit) = adjust_unit(free_space as f64);
+            println!("Free space available: {} {}", free_space, unit);
+        }
+        Err(e) => {
+            eprintln!("Error getting free space: {}", e);
+        }
+    }
 }
 
 /// Fill the provided buffer slice in SECTOR_SIZE chunks with a deterministic
@@ -155,8 +191,8 @@ pub fn fill_fs(
     end_at: &mut i64,
     max_write_rate: i64,
     show_progress: bool,
-) {
-    let mut free = get_freespace(path);
+) -> Result<()> {
+    let mut free = get_freespace(path)?;
     if free == 0 {
         eprintln!("Error: no free space available on the device.");
         process::exit(1);
@@ -201,6 +237,8 @@ pub fn fill_fs(
     }
 
     println!("Total elapsed: {:.2?}", pr_time_str(start_time.elapsed().as_secs_f64()));
+
+    Ok(())
 }
 
 #[cfg(test)]

@@ -7,6 +7,7 @@ clippy:
 	cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 fmt:
+	cargo fmt &
 	cargo fmt --all -- --check
 
 test:
