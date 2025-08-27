@@ -71,8 +71,18 @@ impl WriteArgs {
             eprintln!("Error: Max write rate must be non-negative");
             process::exit(1);
         }
-        if !self.common.dev_path.ends_with("/") {
-            self.common.dev_path.push('/');
+        // don't sure about it
+        #[cfg(unix)]
+        {
+            if !self.common.dev_path.ends_with("/") {
+                self.common.dev_path.push('/');
+            }
+        }
+        #[cfg(windows)]
+        {
+            if !self.common.dev_path.ends_with("\\") {
+                self.common.dev_path.push('\\');
+            }
         }
     }
 }
@@ -107,8 +117,18 @@ impl ReadArgs {
             self.read_single_file = true;
             return;
         }
-        if !self.common.dev_path.ends_with("/") {
-            self.common.dev_path.push('/');
+        // don't sure about it
+        #[cfg(unix)]
+        {
+            if !self.common.dev_path.ends_with("/") {
+                self.common.dev_path.push('/');
+            }
+        }
+        #[cfg(windows)]
+        {
+            if !self.common.dev_path.ends_with("\\") {
+                self.common.dev_path.push('\\');
+            }
         }
     }
 }

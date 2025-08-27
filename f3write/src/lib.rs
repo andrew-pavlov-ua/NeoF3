@@ -1,6 +1,5 @@
 // f3write/src/lib.rs
 
-use std::ffi::CString;
 use std::{
     fs::{File, OpenOptions},
     io::Result,
@@ -15,26 +14,11 @@ use crossterm::{
     execute,
     terminal::{Clear, ClearType},
 };
-use libc::statvfs;
 
 use f3core::{
     flow::{DynamicBuffer, Flow},
     utils::{SECTOR_SIZE, adjust_unit, pr_time_str, random_number},
 };
-
-/// Internal helper: query filesystem free space (in bytes) for given path.
-#[cfg(unix)]
-fn get_freespace(path: &str) -> Result<u64> {
-    let cpath = CString::new(path).expect("CString::new failed");
-    let mut s: statvfs = unsafe { std::mem::zeroed() };
-    let rc = unsafe { libc::statvfs(cpath.as_ptr(), &mut s) };
-    if rc == 0 {
-        Ok(s.f_bavail * s.f_frsize) // bytes available to unprivileged
-    } else {
-        Err(std::io::Error::last_os_error())
-    }
-    // stat.blocks_free() * stat.block_size()
-}
 
 #[cfg(windows)]
 fn available_bytes_windows(path: &std::path::Path) -> std::io::Result<u64> {
@@ -57,6 +41,24 @@ fn available_bytes_windows(path: &std::path::Path) -> std::io::Result<u64> {
         )
     };
     if ok != 0 { Ok(avail) } else { Err(std::io::Error::last_os_error()) }
+}
+
+/// Internal helper: query filesystem free space (in bytes) for given path.
+#[cfg(unix)]
+#[allow(clippy::unnecessary_cast)]
+fn get_freespace(path: &str) -> Result<u64> {
+    use libc::statvfs;
+    use std::ffi::CString;
+
+    let cpath = CString::new(path).expect("CString::new failed");
+    let mut s: statvfs = unsafe { std::mem::zeroed() };
+    let rc = unsafe { libc::statvfs(cpath.as_ptr(), &mut s) };
+    if rc == 0 {
+        Ok(s.f_bavail as u64 * s.f_frsize) // bytes available to unprivileged
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+    // stat.blocks_free() * stat.block_size()
 }
 
 pub fn print_freespace(path: &str) {
