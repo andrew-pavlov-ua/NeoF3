@@ -4,7 +4,7 @@ resolver = "3"
 members = [
   "f3write",
   "f3read", 
-  "f3core",
+  "f3core", "testing_smth",
 ]
 
 

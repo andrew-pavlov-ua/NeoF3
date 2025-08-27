@@ -127,43 +127,43 @@ pub fn random_number(prv_number: u64) -> u64 {
 }
 
 #[rustfmt::skip]
-pub fn fadvise_dontneed(_file: &File) -> Result<()> {
-    // Crashing Win and Mac tests, don't sure if it's really needed
+pub fn fadvise_dontneed(file: &File) -> Result<()> {
+    // Crashing Win and Mac tests, don't sure if it's really needed (6% faster with it)
 
-    // #[cfg(unix)]
-    // {
-    //     use libc;
-    //     use std::os::fd::AsRawFd;
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        use libc;
+        use std::os::fd::AsRawFd;
 
-    //     let rc = unsafe {
-    //         libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_DONTNEED)
-    //     };
+        let rc = unsafe {
+            libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_DONTNEED)
+        };
 
-    //     if rc != 0 {
-    //         return Err(std::io::Error::from_raw_os_error(rc));
-    //     }
-    // }
+        if rc != 0 {
+            return Err(std::io::Error::from_raw_os_error(rc));
+        }
+    }
 
     Ok(())
 }
 
 #[rustfmt::skip]
-pub fn fadvise_sequential(_file: &File) -> Result<()> {
-    // Crashing Win and Mac tests, don't sure if it's really needed
+pub fn fadvise_sequential(file: &File) -> Result<()> {
+    // Crashing Win and Mac tests, don't sure if it's really needed (6% faster with it)
 
-    // #[cfg(unix)]
-    // {
-    //     use libc;
-    //     use std::os::fd::AsRawFd;
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        use libc;
+        use std::os::fd::AsRawFd;
 
-    //     let rc = unsafe {
-    //         libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_SEQUENTIAL)
-    //     };
+        let rc = unsafe {
+            libc::posix_fadvise(file.as_raw_fd(), 0, 0, libc::POSIX_FADV_SEQUENTIAL)
+        };
 
-    //     if rc != 0 {
-    //         return Err(std::io::Error::from_raw_os_error(rc));
-    //     }
-    // }
+        if rc != 0 {
+            return Err(std::io::Error::from_raw_os_error(rc));
+        }
+    }
 
     Ok(())
 }
