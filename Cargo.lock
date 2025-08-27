@@ -422,6 +422,7 @@ dependencies = [
  "simple-log",
  "sysinfo",
  "tempfile",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]

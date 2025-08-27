@@ -4,7 +4,7 @@ use std::{
     io::Result,
     path::Path,
     process,
-    time::Instant,
+    time::{Instant},
 };
 
 pub const SECTOR_SIZE: usize = 512;
@@ -92,6 +92,7 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
             matched_files.push(num);
         }
     }
+    matched_files.sort();
     matched_files
 }
 

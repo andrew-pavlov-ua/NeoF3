@@ -16,6 +16,7 @@ log = "0.4.27"
 crossterm = "0.29"
 sysinfo = "0.37"
 
+# DELETE WINDOWS PLS I HATE IT SM
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.60.2", features = [
   "Win32_Foundation",
