@@ -15,6 +15,7 @@ simple-log = "2.3"
 log = "0.4.27"
 crossterm = "0.29"
 sysinfo = "0.37"
+windows-sys = "0.60.2"
 
 [[bin]]
 name = "nf3_write"
