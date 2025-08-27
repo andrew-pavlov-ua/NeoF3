@@ -2,6 +2,9 @@ name: CICD
 
 on: [push, pull_request]
 
+# permissions:
+#   contents: write
+
 jobs:
   fmt:
     name: rustfmt

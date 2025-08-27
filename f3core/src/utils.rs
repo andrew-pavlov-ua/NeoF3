@@ -4,7 +4,7 @@ use std::{
     io::Result,
     path::Path,
     process,
-    time::{Instant},
+    time::Instant,
 };
 
 pub const SECTOR_SIZE: usize = 512;
