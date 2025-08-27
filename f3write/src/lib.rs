@@ -21,15 +21,21 @@ use f3core::{
 };
 
 #[cfg(windows)]
-pub fn get_free_space(path: &Path) -> io::Result<u64> {
+pub fn get_freespace(path: &str) -> std::io::Result<u64> {
+    use std::ffi::OsStr;
     use std::os::windows::ffi::OsStrExt;
-    use std::{ffi::OsStr, io, path::Path};
     use windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
 
-    let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+    // &str -> &OsStr -> UTF-16 with NUL terminator
+    let wide: Vec<u16> = OsStr::new(path).encode_wide().chain(std::iter::once(0)).collect();
+
     let (mut avail, mut total, mut free) = (0u64, 0u64, 0u64);
     let ok = unsafe { GetDiskFreeSpaceExW(wide.as_ptr(), &mut avail, &mut total, &mut free) };
-    if ok != 0 { Ok(free) } else { Err(io::Error::last_os_error()) }
+    if ok != 0 {
+        Ok(free) // or return `avail` if you want “usable by caller”
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
 }
 
 /// Internal helper: query filesystem free space (in bytes) for given path.
