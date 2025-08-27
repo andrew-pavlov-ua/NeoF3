@@ -7,7 +7,7 @@ edition = "2024"
 f3core = { path = "../f3core" }
 clap    = {version = "4.5", features = [ "derive" ]}
 nix = {version = "0.30.1", features = ["fs"]}
-cargo_metadata = {version = "0.21.0"}
+cargo_metadata = {version = "0.22.0"}
 bytesize = "2.0.1"
 libc = "0.2"
 tempfile = "3.21.0"
