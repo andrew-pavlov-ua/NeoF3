@@ -14,7 +14,7 @@ use crossterm::{
 // from the shared core crate:
 use crate::{
     flow::{DynamicBuffer, Flow},
-    utils::{fadvise_dontneed, fadvise_sequential, random_number, GIB, SECTOR_SIZE},
+    utils::{GIB, SECTOR_SIZE, fadvise_dontneed, fadvise_sequential, random_number},
 };
 
 pub struct FileStats {
