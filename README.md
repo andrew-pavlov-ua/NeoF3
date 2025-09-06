@@ -2,7 +2,7 @@
 
 **NeoF3** is a Rust workspace that reimagines the classic F3 utilities:
 
-- **`f3rs_write`** — fills free space with numbered test files (e.g., `12.h2w`) to benchmark throughput and prepare data for verification.
+- **`nf3_write`** — fills free space with numbered test files (e.g., `12.h2w`) to benchmark throughput and prepare data for verification.
 - **`nf3_read`** — verifies those files/paths, detecting **ok**, **changed**, **overwritten**, and **corrupted** sectors, and reports speed/ETA.
 
 > ⚠️ **Safety note:** The writer can fill your target filesystem completely. Double‑check the path/mount you test and keep other apps closed to avoid running out of space during a run.
@@ -11,7 +11,7 @@
 
 ## Features
 
-### f3rs_write (writer)
+### nf3_write (writer)
 
 - Sequentially writes numbered files (`<index>.h2w`) until free space is exhausted or an explicit end index is reached.
 - Live progress: instantaneous & average speed, ETA, elapsed time.
@@ -49,23 +49,23 @@ cargo build --release
 Verify:
 
 ```bash
-which f3rs_write
-f3rs_write --help
+which nf3_write
+nf3_write --help
 
 which nf3_read
 nf3_read --help
 ```
 
-> The binaries are named **`f3rs_write`** and **`nf3_read`** via each package’s `[[bin]].name`.
+> The binaries are named **`nf3_write`** and **`nf3_read`** via each package’s `[[bin]].name`.
 
 ---
 
 ## Usage
 
-### Writer — f3rs_write
+### Writer — nf3_write
 
 ```bash
-f3rs_write [OPTIONS] [PATH]
+nf3_write [OPTIONS] [PATH]
 ```
 
 Typical options (exact list depends on your build; run `--help`):
@@ -80,10 +80,10 @@ Examples:
 
 ```bash
 # Fill current directory with numbered .h2w files
-f3rs_write
+nf3_write
 
 # Write a single file 12.h2w to a USB drive
-f3rs_write -s 12 -e 12 /media/USB
+nf3_write -s 12 -e 12 /media/USB
 ```
 
 **Sample output:**
@@ -145,7 +145,7 @@ Average speed:      49.42 MB/s
 
 ## Tips for accurate results & performance
 
-- **Writer (`f3rs_write`)**
+- **Writer (`nf3_write`)**
   - Prefer a larger block size (1–8 MiB) internally; avoid per‑block `fsync` — sync at file end.
   - If you need to force durability, use `sync_data()` on the file and optionally fsync the parent directory.
   - Keep progress rendering out of the hot write path (separate thread).
@@ -168,7 +168,7 @@ Average speed:      49.42 MB/s
 NeoF3/
   Cargo.toml          # [workspace]
   f3core/             # shared library logic (no clap in core)
-  f3write/            # writer binary (installs as `f3rs_write`)
+  f3write/            # writer binary (installs as `nf3_write`)
   f3read/             # reader binary (installs as `nf3_read`)
 ```
 
@@ -193,7 +193,7 @@ cargo test -p f3core -- --nocapture --test-threads=1
 
 ```bash
 # Writer
-cargo run -p f3write --bin f3rs_write -- --help
+cargo run -p f3write --bin nf3_write -- --help
 
 # Reader
 cargo run -p f3read  --bin nf3_read  -- --help
