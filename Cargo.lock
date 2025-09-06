@@ -120,12 +120,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bytesize"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3c8f83209414aacf0eeae3cf730b18d6981697fba62f200fcfb92b9f082acba"
-
-[[package]]
 name = "camino"
 version = "1.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -392,13 +386,13 @@ dependencies = [
  "libc",
  "log",
  "simple-log",
+ "tempfile",
 ]
 
 [[package]]
 name = "f3read"
 version = "0.1.0"
 dependencies = [
- "bytesize",
  "clap",
  "crossterm",
  "f3core",
@@ -411,7 +405,6 @@ dependencies = [
 name = "f3write"
 version = "0.1.0"
 dependencies = [
- "bytesize",
  "cargo_metadata",
  "clap",
  "crossterm",

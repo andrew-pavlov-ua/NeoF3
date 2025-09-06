@@ -8,6 +8,7 @@ use std::{
 };
 
 pub const SECTOR_SIZE: usize = 512;
+pub const GIB: u64 = 1_073_741_824; // 1 GiB in bytes
 
 pub fn print_header(name: &str) {
     let version = env!("CARGO_PKG_VERSION");
@@ -184,3 +185,22 @@ pub fn parse_dev_and_num(full: &str) -> Option<(&str, i32)> {
     let dev_path = &name[..i];
     Some((dev_path, num))
 }
+
+// pub fn spawn_report_thread(rx: Receiver<FlowSnapshot>) {
+//     thread::spawn(move || {
+//         while let Ok(s) = rx.recv() {
+//             let mut snap = s;
+
+//             while let Ok(s) = rx.try_recv() {
+//                 snap = s;
+//             }
+
+//             if snap.end_reporting {
+//                 break;
+//             }
+
+//             snap.report_progress();
+//             thread::sleep(Duration::from_millis(500));
+//         }
+//     });
+// }

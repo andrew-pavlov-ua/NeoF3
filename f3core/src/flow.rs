@@ -56,6 +56,7 @@ pub struct Flow {
 
     measure_start_time: Instant,
     last_inst_bps: f64,
+
     last_report_time: Instant,
 }
 
@@ -89,6 +90,10 @@ impl Flow {
         }
     }
 
+    pub fn show_progress(&self) -> bool {
+        self.progress
+    }
+
     pub fn start_measurement(&mut self) {
         if self.progress && self.has_enough_measurements() {
             self.report_progress();
@@ -120,11 +125,12 @@ impl Flow {
 
         execute!(io::stdout(), Clear(ClearType::CurrentLine), MoveToColumn(0), Print(progress_str))
             .unwrap();
+        self.last_report_time = Instant::now();
         use std::io::Write;
         std::io::stdout().flush().unwrap();
     }
 
-    pub fn get_avg_speed(&mut self) -> f64 {
+    pub fn get_avg_speed(&self) -> f64 {
         ((self.measured_blocks * self.block_size as u64 * 1000) / self.measured_time_ms) as f64
     }
 
@@ -204,6 +210,7 @@ impl Flow {
 
         self.adjust_state(inst_speed, delay);
 
+        // Using single thread for reports is more effective accoording to tests
         if self.progress && self.last_report_time.elapsed().as_secs() >= Self::REPORT_INTERVAL_SECS
         {
             self.report_progress();
