@@ -26,7 +26,10 @@ pub fn get_freespace(path: &str) -> std::io::Result<u64> {
     use windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
 
     // &str -> &OsStr -> UTF-16 with NUL terminator
-    let wide: Vec<u16> = OsStr::new(path).encode_wide().chain(std::iter::once(0)).collect();
+    let wide: Vec<u16> = OsStr::new(path)
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
 
     let (mut avail, mut total, mut free) = (0u64, 0u64, 0u64);
     let ok = unsafe { GetDiskFreeSpaceExW(wide.as_ptr(), &mut avail, &mut total, &mut free) };
@@ -81,7 +84,12 @@ pub fn create_and_fill_file(
     let full = format!("{}/{}.h2w", path, number);
     io::stdout().flush().unwrap();
 
-    match OpenOptions::new().create(true).write(true).truncate(true).open(&full) {
+    match OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(&full)
+    {
         Ok(mut file) => fill_file(&mut file, number, size, fw),
         Err(e) if e.raw_os_error() == Some(28) => {
             // ENOSPC
@@ -149,7 +157,10 @@ pub fn fill_fs(
         }
     }
 
-    println!("Total elapsed: {:.2?}", pr_time_str(start_time.elapsed().as_secs_f64()));
+    println!(
+        "Total elapsed: {:.2?}",
+        pr_time_str(start_time.elapsed().as_secs_f64())
+    );
 
     Ok(())
 }

@@ -98,7 +98,9 @@ pub fn ls_my_files(path: &str, start_at: i64, end_at: i64) -> Vec<i64> {
 }
 
 fn can_delete(file: &str) -> bool {
-    fs::metadata(file).map(|m| !m.permissions().readonly()).unwrap_or(false)
+    fs::metadata(file)
+        .map(|m| !m.permissions().readonly())
+        .unwrap_or(false)
 }
 
 pub fn pr_time_str(mut sec: f64) -> String {

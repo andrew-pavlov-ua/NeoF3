@@ -28,7 +28,11 @@ fn main() {
 
     adjust_dev_path(&mut args.common.dev_path);
 
-    let files = ls_my_files(&args.common.dev_path, args.common.start_at, args.common.end_at);
+    let files = ls_my_files(
+        &args.common.dev_path,
+        args.common.start_at,
+        args.common.end_at,
+    );
 
     match iterate_files(
         &args.common.dev_path,

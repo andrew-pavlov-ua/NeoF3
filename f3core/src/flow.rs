@@ -103,11 +103,19 @@ impl Flow {
     }
 
     pub fn report_progress(&mut self) {
-        let inst_bps = if self.last_inst_bps.is_finite() { self.last_inst_bps } else { 0.0 };
+        let inst_bps = if self.last_inst_bps.is_finite() {
+            self.last_inst_bps
+        } else {
+            0.0
+        };
         // let inst_speed =
         //     (self.blocks_per_delay * self.block_size as i64) as f64 * 1000.0 / self.delay_ms as f64;
 
-        let avg_bps = if self.has_enough_measurements() { self.get_avg_speed() } else { inst_bps };
+        let avg_bps = if self.has_enough_measurements() {
+            self.get_avg_speed()
+        } else {
+            inst_bps
+        };
 
         let (inst_speed, unit) = adjust_unit(avg_bps);
         if self.total_size < self.total_processed {
@@ -123,8 +131,13 @@ impl Flow {
             progress_str.push_str(&pr_time_str(eta));
         }
 
-        execute!(io::stdout(), Clear(ClearType::CurrentLine), MoveToColumn(0), Print(progress_str))
-            .unwrap();
+        execute!(
+            io::stdout(),
+            Clear(ClearType::CurrentLine),
+            MoveToColumn(0),
+            Print(progress_str)
+        )
+        .unwrap();
         self.last_report_time = Instant::now();
         use std::io::Write;
         std::io::stdout().flush().unwrap();
@@ -377,7 +390,10 @@ impl Default for DynamicBuffer {
 
 impl DynamicBuffer {
     pub fn new() -> Self {
-        Self { buf: vec![0u8; DEFAULT_BUF_SIZE], max_buf: false }
+        Self {
+            buf: vec![0u8; DEFAULT_BUF_SIZE],
+            max_buf: false,
+        }
     }
 
     pub fn get_buf(&mut self, size: usize) -> &mut [u8] {

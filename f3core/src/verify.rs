@@ -97,8 +97,13 @@ impl FileStats {
 
         while !self.read_all {
             let mut rem_chunk_size = flow.get_remaining_chunk_size();
-            bytes_read =
-                check_chunk(&mut dbuf, &mut file, &mut expected_offset, &mut rem_chunk_size, self);
+            bytes_read = check_chunk(
+                &mut dbuf,
+                &mut file,
+                &mut expected_offset,
+                &mut rem_chunk_size,
+                self,
+            );
             if bytes_read == 0 {
                 break;
             }
@@ -160,8 +165,12 @@ fn check_chunk(
 
         total_bytes_read += filled;
         chunk_left -= filled as u64;
-        *expected_offset =
-            check_buffer(&buf[..filled as usize], filled as usize, *expected_offset, stats);
+        *expected_offset = check_buffer(
+            &buf[..filled as usize],
+            filled as usize,
+            *expected_offset,
+            stats,
+        );
     }
 
     stats.bytes_read += total_bytes_read as u64;
