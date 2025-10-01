@@ -7,7 +7,7 @@ edition = "2024"
 f3core = { path = "../f3core" }
 clap    = {version = "4.5", features = [ "derive" ]}
 simple-log = "2.3.0"
-log = "0.4.27"
+log = "0.4.28"
 libc = "0.2.175"
 crossterm = "0.29.0"
 

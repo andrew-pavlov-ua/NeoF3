@@ -8,7 +8,7 @@ clap    = "4.5"
 crossterm = "0.29"
 fs = "0.0.5"
 libc = "0.2.175"
-log = "0.4.23"
+log = "0.4.28"
 simple-log = "2.3.0"
 tempfile = "3.21.0"
 
