@@ -1,9 +1,9 @@
-// f3read/src/lib.rs
-
 use std::{io::Result, time::Instant};
 
 use f3core::{
+    cli::ReadArgs,
     flow::Flow,
+    utils::{self, adjust_dev_path, ls_my_files, parse_dev_and_num},
     utils::{SECTOR_SIZE, adjust_unit},
     verify::FileStats,
 };
@@ -11,6 +11,38 @@ use f3core::{
 pub fn pr_avg_speed(avg_speed: f64) {
     let (size, unit) = adjust_unit(avg_speed);
     println!("Average speed: {:.2} {}/s", size, unit);
+}
+
+pub fn run(mut args: ReadArgs) -> Result<()> {
+    // Validate the arguments
+    args.validate_args();
+
+    // Display header
+    utils::print_header("read");
+
+    if args.read_single_file {
+        let (dev_path, file_num) = parse_dev_and_num(&args.common.dev.dev_path).unwrap();
+        args.common.start_at = file_num as i64;
+        args.common.end_at = file_num as i64;
+        args.common.dev.dev_path = dev_path.to_string();
+    }
+
+    adjust_dev_path(&mut args.common.dev.dev_path);
+
+    let files = ls_my_files(
+        &args.common.dev.dev_path,
+        args.common.start_at,
+        args.common.end_at,
+    );
+
+    iterate_files(
+        &args.common.dev.dev_path,
+        files,
+        args.common.start_at,
+        // args.common.end_at,
+        args.max_read_rate,
+        args.common.show_progress,
+    )
 }
 
 pub fn iterate_files(

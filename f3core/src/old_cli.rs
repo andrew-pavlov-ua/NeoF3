@@ -12,6 +12,7 @@ pub struct CommonArgs {
         help = "First NUM.h2w file to be written"
     )]
     pub start_at: i64,
+
     #[arg(
         short = 'e',
         long = "end-at",
@@ -20,6 +21,7 @@ pub struct CommonArgs {
         help = "Last NUM.h2w file to be written"
     )]
     pub end_at: i64,
+
     #[arg(
         short = 'p',
         long = "show-progress",
@@ -28,6 +30,7 @@ pub struct CommonArgs {
         help = "Show progress if NUM is not zero"
     )]
     pub show_progress: bool,
+
     #[arg(
         value_name = "PATH",
         default_value = "",
@@ -49,6 +52,22 @@ impl CommonArgs {
         if self.end_at < self.start_at && self.end_at != 0 {
             eprintln!("Error: End at must be greater than or equal to start at, or zero");
             process::exit(1);
+        }
+    }
+
+    // Normalizes dev_path to end with the platform's path separator.
+    pub(crate) fn normalize_dir_path(&mut self) {
+        #[cfg(unix)]
+        {
+            if !self.dev_path.ends_with('/') {
+                self.dev_path.push('/');
+            }
+        }
+        #[cfg(windows)]
+        {
+            if !self.dev_path.ends_with('\\') {
+                self.dev_path.push('\\');
+            }
         }
     }
 }
@@ -80,19 +99,7 @@ impl WriteArgs {
             eprintln!("Error: Max write rate must be non-negative");
             process::exit(1);
         }
-        // don't sure about it
-        #[cfg(unix)]
-        {
-            if !self.common.dev_path.ends_with("/") {
-                self.common.dev_path.push('/');
-            }
-        }
-        #[cfg(windows)]
-        {
-            if !self.common.dev_path.ends_with("\\") {
-                self.common.dev_path.push('\\');
-            }
-        }
+        self.common.normalize_dir_path();
     }
 }
 
@@ -121,6 +128,58 @@ pub struct ReadArgs {
 }
 
 impl ReadArgs {
+    pub fn validate_args(&mut self) {
+        self.common.validate_args();
+        if self.max_read_rate < 0 {
+            eprintln!("Error: Max read rate must be non-negative");
+            process::exit(1);
+        }
+        if self.common.dev_path.ends_with(".h2w") {
+            self.read_single_file = true;
+            return;
+        }
+        self.common.normalize_dir_path();
+    }
+}
+
+#[derive(Parser, Debug)]
+#[command(
+    name = "f3probeuse simple_log::LogConfigBuilder;",
+    version,
+    about = "F3 Probe -- probe a block device for \ncounterfeit flash memory. If counterfeit, \nf3probe identifies the fake type and real memory size"
+)]
+pub struct ProbeArgs {
+    // Do not restore blocks of the device after probing it
+    #[arg(long)]
+    destructive: bool,
+
+    // Trade speed for less use of memory
+    #[arg(long)]
+    min_memory: bool,
+
+    // Reset method to use during the probe
+    #[arg(long)]
+    reset_type: Option<ResetType>,
+
+    // Time reads, writes, and resets
+    #[arg(long)]
+    time_ops: bool,
+
+    // Hidden developer options
+    // Real size of the emulated drive
+    #[arg(long, hide = true)]
+    real_size: Option<u64>,
+
+    // Fake size of the emulated drive
+    #[arg(long, hide = true)]
+    fake_size: Option<u64>,
+
+    // Wrap size for the emulated drive
+    #[arg(long, hide = true)]
+    wrap: Option<u32>,
+}
+
+impl ProbeArgs {
     pub fn validate_args(&mut self) {
         self.common.validate_args();
         if self.max_read_rate < 0 {

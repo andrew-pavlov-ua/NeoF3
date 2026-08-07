@@ -1,5 +1,3 @@
-// f3write/src/lib.rs
-
 use std::{
     fs::OpenOptions,
     io::{self, Result, Write},
@@ -19,6 +17,52 @@ use f3core::{
     utils::{GIB, adjust_unit, pr_time_str},
 };
 
+// use log::Level;
+// use simple_log::LogConfigBuilder;
+
+use f3core::{
+    cli::WriteArgs,
+    utils::{self},
+};
+
+pub fn run(mut args: WriteArgs) -> Result<()> {
+    // File::create("f3write/f3write.log").expect("Failed to clear log file");
+
+    // let log_config = LogConfigBuilder::builder()
+    //     .path("f3write/f3write.log")
+    //     .level(Level::Debug)
+    //     .expect("Failed to set log level")
+    //     .output_file()
+    //     .build();
+
+    // simple_log::new(log_config).expect("Failed to initialize logging");
+    // log::info!("Starting program");
+
+    // let mut args = WriteArgs::parse();
+
+    // Validate the arguments
+    args.validate_args();
+
+    // Display header
+    utils::print_header("write");
+
+    utils::adjust_dev_path(&mut args.common.dev.dev_path);
+
+    utils::unlink_old_files(
+        &args.common.dev.dev_path,
+        args.common.start_at,
+        args.common.end_at,
+    );
+    println!("Old files unlinked successfully.");
+
+    fill_fs(
+        &args.common.dev.dev_path,
+        args.common.start_at,
+        &mut args.common.end_at,
+        args.max_write_rate,
+        args.common.show_progress,
+    )
+}
 #[cfg(windows)]
 pub fn get_freespace(path: &str) -> std::io::Result<u64> {
     use std::ffi::OsStr;
@@ -50,19 +94,18 @@ fn get_freespace(path: &str) -> Result<u64> {
     let cpath = CString::new(path).expect("CString::new failed");
     let mut s: statvfs = unsafe { std::mem::zeroed() };
     let rc = unsafe { libc::statvfs(cpath.as_ptr(), &mut s) };
-    if rc == 0 {
-        Ok(s.f_bavail as u64 * s.f_frsize) // bytes available to unprivileged
-    } else {
-        Err(std::io::Error::last_os_error())
+    if rc != 0 {
+        return Err(std::io::Error::last_os_error());
     }
-    // stat.blocks_free() * stat.block_size()
+
+    Ok(s.f_bavail as u64 * s.f_frsize) // bytes available to unprivileged
 }
 
 pub fn print_freespace(path: &str) {
     match get_freespace(path) {
         Ok(free_space) => {
             let (free_space, unit) = adjust_unit(free_space as f64);
-            println!("Free space available: {} {}", free_space, unit);
+            println!("Free space available: {} {}", free_space.round(), unit);
         }
         Err(e) => {
             eprintln!("Error getting free space: {}", e);

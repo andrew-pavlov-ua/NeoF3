@@ -12,8 +12,8 @@ pub const GIB: u64 = 1_073_741_824; // 1 GiB in bytes
 
 pub fn print_header(name: &str) {
     let version = env!("CARGO_PKG_VERSION");
-    println!("F3 {}: A tool to check file system conditions", name);
-    println!("Usage: F3 {} [OPTIONS]", name);
+    println!("NF3 {}: A tool to check file system conditions", name);
+    println!("Usage: nf3 {} [OPTIONS]", name);
     println!("Version: {}", version);
     println!("This is free software; see the source for copying conditions.");
 }

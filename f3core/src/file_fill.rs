@@ -1,5 +1,3 @@
-// f3core/src/file_fill.rs
-
 use std::{
     fs::File,
     io::{self, ErrorKind, Write},
@@ -18,7 +16,7 @@ pub fn fill_buffer(buf: &mut [u8], size: usize, offset: u64) -> u64 {
     let mut current = offset;
     assert!(size > 0, "buffer must not be empty");
     assert!(
-        size % SECTOR_SIZE == 0,
+        size.is_multiple_of(SECTOR_SIZE),
         "buffer size must be multiple of SECTOR_SIZE"
     );
 

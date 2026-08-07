@@ -24,4 +24,4 @@ windows-sys = { version = "0.60.2", features = [
 
 [[bin]]
 name = "nf3_write"
-path = "src/main.rs" 
+path = "src/main.rs"

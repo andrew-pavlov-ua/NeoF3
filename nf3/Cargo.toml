@@ -1,0 +1,16 @@
+[package]
+name = "nf3"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+f3core = { path = "../f3core" }
+f3read = { path = "../f3read" }
+f3write = { path = "../f3write" }
+f3probe = { path = "../f3probe" }
+
+clap = { version = "4", features = ["derive"] }
+
+[[bin]]
+name = "nf3"
+path = "src/main.rs"

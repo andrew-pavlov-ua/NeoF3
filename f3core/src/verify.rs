@@ -179,7 +179,7 @@ fn check_chunk(
 }
 
 fn check_buffer(buf: &[u8], size: usize, mut expected_offset: u64, stats: &mut FileStats) -> u64 {
-    assert!(size % SECTOR_SIZE == 0);
+    assert!(size.is_multiple_of(SECTOR_SIZE));
 
     for i in (0..size).step_by(SECTOR_SIZE) {
         let sector = &buf[i..i + SECTOR_SIZE];
@@ -189,8 +189,6 @@ fn check_buffer(buf: &[u8], size: usize, mut expected_offset: u64, stats: &mut F
 
     expected_offset
 }
-
-pub const TOLERANCE: usize = 2;
 
 fn read_offset(buf: &[u8]) -> u64 {
     let mut arr = [0u8; 8];
@@ -252,98 +250,151 @@ fn read_all(file: &mut File, buf: &mut [u8]) -> isize {
     filled as isize
 }
 
+pub const TOLERANCE: usize = 2;
+
 #[cfg(test)]
-use crate::tests::helpers::{assert_counts, bump_words, gen_ok_sector, write_word_ne};
+mod tests {
 
-#[test]
-fn sector_ok() {
-    let mut stats = FileStats::new();
-    let sector = gen_ok_sector(0);
-    check_sector(&sector, 0, &mut stats);
-    assert_counts(&stats, 1, 0, 0, 0);
-}
+    use crate::tests::helpers::{assert_counts, bump_words, gen_ok_sector, write_word_ne};
+    use crate::utils::SECTOR_SIZE;
+    use crate::verify::TOLERANCE;
+    use crate::verify::check_sector;
 
-#[test]
-fn sector_changed_le_tolerance() {
-    let mut stats = FileStats::new();
-    let mut sector = gen_ok_sector(512); // любой корректный offset
-
-    let mut to_bump = Vec::new();
-    for i in 1..=TOLERANCE {
-        to_bump.push(i); // 1..=TOLERANCE
+    #[test]
+    fn sector_ok() {
+        let mut stats = FileStats::new();
+        let sector = gen_ok_sector(0);
+        check_sector(&sector, 0, &mut stats);
+        assert_counts(&stats, 1, 0, 0, 0);
     }
-    bump_words(&mut sector, &to_bump);
 
-    check_sector(&sector, 512, &mut stats);
-    assert_counts(&stats, 0, 0, 1, 0);
-}
+    #[test]
+    fn sector_changed_le_tolerance() {
+        let mut stats = FileStats::new();
+        let mut sector = gen_ok_sector(512); // любой корректный offset
 
-#[test]
-fn sector_corrupted_gt_tolerance_header_ok() {
-    let mut stats = FileStats::new();
-    let mut sector = gen_ok_sector(1024);
+        let mut to_bump = Vec::new();
+        for i in 1..=TOLERANCE {
+            to_bump.push(i); // 1..=TOLERANCE
+        }
+        bump_words(&mut sector, &to_bump);
 
-    // Corrupt TOLERANCE+1 words (not chanhging offset)
-    let mut to_bump = Vec::new();
-    for i in 1..=(TOLERANCE + 1) {
-        to_bump.push(i);
+        check_sector(&sector, 512, &mut stats);
+        assert_counts(&stats, 0, 0, 1, 0);
     }
-    bump_words(&mut sector, &to_bump);
 
-    check_sector(&sector, 1024, &mut stats);
-    assert_counts(&stats, 0, 1, 0, 0);
-}
+    #[test]
+    fn sector_corrupted_gt_tolerance_header_ok() {
+        let mut stats = FileStats::new();
+        let mut sector = gen_ok_sector(1024);
 
-#[test]
-fn sector_overwritten_header_wrong_errors_le_tolerance() {
-    let mut stats: FileStats = FileStats::new();
-    let mut sector = gen_ok_sector(0);
+        // Corrupt TOLERANCE+1 words (not chanhging offset)
+        let mut to_bump = Vec::new();
+        for i in 1..=(TOLERANCE + 1) {
+            to_bump.push(i);
+        }
+        bump_words(&mut sector, &to_bump);
 
-    // Getting "overwritten": offset != expected_offset,
-    // but the other words match (error_count == 0 <= TOLERANCE)
-    write_word_ne(&mut sector, 0, 0);
-
-    check_sector(&sector, 2048, &mut stats);
-    assert_counts(&stats, 0, 0, 0, 1);
-}
-
-#[test]
-fn sector_corrupted_header_wrong_errors_gt_tolerance() {
-    let mut stats = FileStats::new();
-    let mut sector = gen_ok_sector(4096);
-
-    // Incorrect header + > TOLERANCE corrupted
-    write_word_ne(&mut sector, 0, 0xDEAD_BEEF);
-    let mut to_bump = Vec::new();
-    for i in 1..=(TOLERANCE + 1) {
-        to_bump.push(i);
+        check_sector(&sector, 1024, &mut stats);
+        assert_counts(&stats, 0, 1, 0, 0);
     }
-    bump_words(&mut sector, &to_bump);
 
-    check_sector(&sector, 4096, &mut stats);
-    assert_counts(&stats, 0, 1, 0, 0);
+    #[test]
+    fn sector_overwritten_header_wrong_errors_le_tolerance() {
+        let mut stats: FileStats = FileStats::new();
+        let mut sector = gen_ok_sector(0);
+
+        // Getting "overwritten": offset != expected_offset,
+        // but the other words match (error_count == 0 <= TOLERANCE)
+        write_word_ne(&mut sector, 0, 0);
+
+        check_sector(&sector, 2048, &mut stats);
+        assert_counts(&stats, 0, 0, 0, 1);
+    }
+
+    #[test]
+    fn sector_corrupted_header_wrong_errors_gt_tolerance() {
+        let mut stats = FileStats::new();
+        let mut sector = gen_ok_sector(4096);
+
+        // Incorrect header + > TOLERANCE corrupted
+        write_word_ne(&mut sector, 0, 0xDEAD_BEEF);
+        let mut to_bump = Vec::new();
+        for i in 1..=(TOLERANCE + 1) {
+            to_bump.push(i);
+        }
+        bump_words(&mut sector, &to_bump);
+
+        check_sector(&sector, 4096, &mut stats);
+        assert_counts(&stats, 0, 1, 0, 0);
+    }
+
+    // ---- test for check_buffer (some secs in a row) ----
+
+    #[test]
+    fn buffer_three_sectors_all_ok() {
+        let mut stats = FileStats::new();
+        let expected_offset = 0u64;
+
+        let s0 = gen_ok_sector(0);
+        let s1 = gen_ok_sector(512);
+        let s2 = gen_ok_sector(1024);
+
+        let mut buf = Vec::with_capacity(SECTOR_SIZE * 3);
+        buf.extend_from_slice(&s0);
+        buf.extend_from_slice(&s1);
+        buf.extend_from_slice(&s2);
+
+        let new_off = check_buffer(&buf, buf.len(), expected_offset, &mut stats);
+
+        assert_eq!(new_off, 1536);
+        assert_counts(&stats, 3, 0, 0, 0);
+    }
+
+    // ---- tests for check_buffer ----
+
+    #[cfg(test)]
+    const DEFAULT_BUF_SIZE: usize = 2 * 1024 * 1024; // 2MB
+    #[cfg(test)]
+    use crate::verify::{FileStats, check_buffer};
+
+    struct BufferTestSetup {
+        buf: Vec<u8>,
+        expect_offset: u64,
+        stats: FileStats,
+    }
+
+    impl BufferTestSetup {
+        fn new() -> BufferTestSetup {
+            BufferTestSetup {
+                buf: vec![0u8; DEFAULT_BUF_SIZE],
+                expect_offset: DEFAULT_BUF_SIZE as u64,
+                stats: FileStats::new(),
+            }
+        }
+    }
+
+    #[test]
+    fn check_buffer_ok() {
+        let mut test_setup = BufferTestSetup::new();
+
+        let actual_offset =
+            check_buffer(&test_setup.buf, DEFAULT_BUF_SIZE, 0, &mut test_setup.stats);
+
+        assert_eq!(test_setup.expect_offset, actual_offset)
+    }
+
+    #[test]
+    fn check_buffer_incorrect_offset() {
+        let mut test_setup = BufferTestSetup::new();
+
+        let actual_offset = check_buffer(
+            &test_setup.buf,
+            DEFAULT_BUF_SIZE - SECTOR_SIZE,
+            0,
+            &mut test_setup.stats,
+        );
+
+        assert_ne!(test_setup.expect_offset, actual_offset)
+    }
 }
-
-// ---- test for check_buffer (some secs in a row) ----
-
-#[test]
-fn buffer_three_sectors_all_ok() {
-    let mut stats = FileStats::new();
-    let expected_offset = 0u64;
-
-    let s0 = gen_ok_sector(0);
-    let s1 = gen_ok_sector(512);
-    let s2 = gen_ok_sector(1024);
-
-    let mut buf = Vec::with_capacity(SECTOR_SIZE * 3);
-    buf.extend_from_slice(&s0);
-    buf.extend_from_slice(&s1);
-    buf.extend_from_slice(&s2);
-
-    let new_off = check_buffer(&buf, buf.len(), expected_offset, &mut stats);
-
-    assert_eq!(new_off, 1536);
-    assert_counts(&stats, 3, 0, 0, 0);
-}
-
-// ---- tests for check_buffer ----

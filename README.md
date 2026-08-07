@@ -1,38 +1,60 @@
-# NeoF3 — Fast Flash Fake Finder (Rust)
+# NeoF3 --- Fast Flash Fake Finder (Rust)
 
-**NeoF3** is a Rust workspace that reimagines the classic F3 utilities:
+**NeoF3** is a Rust implementation of the classic F3 utilities for
+detecting counterfeit and unreliable flash storage.
 
-- **`nf3_write`** — fills free space with numbered test files (e.g., `12.h2w`) to benchmark throughput and prepare data for verification.
-- **`nf3_read`** — verifies those files/paths, detecting **ok**, **changed**, **overwritten**, and **corrupted** sectors, and reports speed/ETA.
+The recommended interface is a single executable with subcommands:
 
-> ⚠️ **Safety note:** The writer can fill your target filesystem completely. Double‑check the path/mount you test and keep other apps closed to avoid running out of space during a run.
+``` bash
+nf3 write
+nf3 read
+```
 
----
+For backward compatibility, the standalone binaries are still supported:
+
+``` bash
+nf3_write
+nf3_read
+```
+
+Currently available tools:
+
+-   **`nf3 write`** --- fills free space with numbered test files
+    (`*.h2w`) to prepare a filesystem for verification.
+-   **`nf3 read`** --- verifies those files and detects corruption,
+    overwritten sectors, and counterfeit flash behavior.
+
+> **Why a unified CLI?**
+>
+> Starting with v0.2, NeoF3 provides a single `nf3` executable with
+> subcommands (`write`, `read`, and future tools such as `probe`, `fix`,
+> and `brew`). The legacy binaries remain available for backwards
+> compatibility.
+
+> ⚠️ **Safety note:** The writer can fill the target filesystem
+> completely. Always verify the destination path before starting a test.
 
 ## Features
 
-### nf3_write (writer)
+### `nf3 write`
 
-- Sequentially writes numbered files (`<index>.h2w`) until free space is exhausted or an explicit end index is reached.
-- Live progress: instantaneous & average speed, ETA, elapsed time.
-- Resume‑friendly: start/stop by file index.
-- Optional rate limiting (soft) for reproducible benchmarking.
+-   Sequentially writes numbered `.h2w` files.
+-   Resume-friendly via start/end file indexes.
+-   Live progress with speed, ETA and elapsed time.
+-   Optional write-rate limiting.
 
-### nf3_read (reader)
+### `nf3 read`
 
-- Scans files/paths in fixed‑size sectors and classifies each sector as:
-  - **ok** — matches the expected pattern,
-  - **corrupted** — random/invalid content,
-  - **changed** — tag matches, payload altered,
-  - **overwritten** — valid pattern of a *different* sector (aliasing/wrap‑around).
-- Aggregated per‑file and total stats; speed and ETA reporting.
-- Works on single files or whole paths (e.g., a mountpoint).
-
----
+-   Verifies files or entire directories.
+-   Detects:
+    -   **ok**
+    -   **corrupted**
+    -   **changed**
+    -   **overwritten**
+-   Live progress with throughput and ETA.
+-   Aggregated per-file and total statistics.
 
 ## Install
-
-From the workspace root:
 
 ```bash
 # Installs both binaries if you have a helper like `just`:
@@ -43,175 +65,116 @@ Or build manually:
 
 ```bash
 cargo build --release
-# Binaries will be in target/release/
 ```
 
-Verify:
+Generated executables:
 
-```bash
-which nf3_write
+``` text
+target/release/nf3
+target/release/nf3_write
+target/release/nf3_read
+```
+
+Verify installation:
+
+``` bash
+nf3 --help
+nf3 write --help
+nf3 read --help
+
 nf3_write --help
-
-which nf3_read
 nf3_read --help
 ```
 
-> The binaries are named **`nf3_write`** and **`nf3_read`** via each package’s `[[bin]].name`.
-
----
-
 ## Usage
 
-### Writer — nf3_write
+### Preferred CLI
 
-```bash
-nf3_write [OPTIONS] [PATH]
+#### Write
+
+``` bash
+nf3 write [OPTIONS] [PATH]
 ```
-
-Typical options (exact list depends on your build; run `--help`):
-
-- `-s, --start-at <NUM>` — first `<NUM>.h2w` to write (default: `1`)
-- `-e, --end-at <NUM>` — last `<NUM>.h2w` to write (default: `0` = auto/ignore)
-- `--show-progress=<BOOL>` — enable/disable live progress (default: `true`)
-- `-w, --max-write-rate <KBPS>` — soft limit write rate in KB/s (default: `0` = unlimited)
-- `PATH` — directory/mount to write files into (default: current dir)
 
 Examples:
 
-```bash
-# Fill current directory with numbered .h2w files
-nf3_write
-
-# Write a single file 12.h2w to a USB drive
-nf3_write -s 12 -e 12 /media/USB
+``` bash
+nf3 write
+nf3 write /media/USB
+nf3 write -s 12 -e 12 /media/USB
 ```
 
-**Sample output:**
+#### Read
 
-```bash
-Version: 0.1.0
-Free space: 14.46875 MB
-start_at: 12
-end_at: 12
-Filling file: 12.h2w                                                                                                      - OK
-Free space available: 0 Bytes
-Average speed: 18.56 MB/s
-Total elapsed: 462.08ms
+``` bash
+nf3 read [OPTIONS] <PATH>...
 ```
 
----
+Examples:
 
-### Reader — nf3_read
+``` bash
+nf3 read .
+nf3 read ./12.h2w
+nf3 read /mnt/usb1
+```
 
-```bash
+## Legacy CLI
+
+The previous command names continue to work:
+
+``` bash
+nf3_write [OPTIONS] [PATH]
 nf3_read [OPTIONS] <PATH>...
 ```
 
-Typical options (run `--help` for your build):
-
-- `-s, --start-at <NUM>` / `-e, --end-at <NUM>` — index range to verify
-- `--show-progress=<BOOL>` — enable/disable live progress (default: `true`)
-- `-r, --max-read-rate <KBPS>` — soft limit read rate in KB/s (default: `0` = unlimited)
-- `PATH...` — one or multiple files/paths to verify
-
-Examples:
-
-```bash
-# Verify all .h2w files in current directory
-nf3_read .
-
-# Verify a single file
-nf3_read ./12.h2w
-
-# Verify an entire mounted path
-nf3_read /mnt/usb1
-```
-
-**Output at a glance:**
-
-```bash
-        SECTORS      ok/corrupted/changed/overwritten
-Validating file: 12.h2w ...        2097152/       0/      0/       0
-...
-Data OK:            10.05 GB
-Data LOST:          0 Bytes
-Corrupted:          0 Bytes
-Slightly changed:   0 Bytes
-Overwritten:        0 Bytes
-Average speed:      49.42 MB/s
-```
-
----
-
-## Tips for accurate results & performance
-
-- **Writer (`nf3_write`)**
-  - Prefer a larger block size (1–8 MiB) internally; avoid per‑block `fsync` — sync at file end.
-  - If you need to force durability, use `sync_data()` on the file and optionally fsync the parent directory.
-  - Keep progress rendering out of the hot write path (separate thread).
-
-- **Reader (`nf3_read`)**
-  - If you just wrote the files and want *cold* reads, consider dropping the file’s page cache (Unix `posix_fadvise(..., DONTNEED)`) once before starting, or periodically in big chunks.
-  - Do sequential reads with a large reusable buffer (1–8 MiB). `BufReader` helps only for tiny reads; otherwise read directly.
-  - For raw‑device‑like speeds on Linux, `O_DIRECT` is possible but requires 4KiB alignment (advanced).
-
-- **General**
-  - Run in **release** mode for realistic performance: `cargo run --release -p f3write`.
-  - Close all writer handles before verification.
-  - Ensure target path is correct to avoid filling your system drive.
-
----
+  New                      Legacy
+  ------------------------ ------------------------
+  `nf3 write /media/USB`   `nf3_write /media/USB`
+  `nf3 write -s 12`        `nf3_write -s 12`
+  `nf3 read .`             `nf3_read .`
+  `nf3 read /mnt/usb`      `nf3_read /mnt/usb`
 
 ## Project layout
 
-```bash
+``` text
 NeoF3/
-  Cargo.toml          # [workspace]
-  f3core/             # shared library logic (no clap in core)
-  f3write/            # writer binary (installs as `nf3_write`)
-  f3read/             # reader binary (installs as `nf3_read`)
+├── Cargo.toml
+├── nf3/
+├── f3core/
+├── f3write/
+├── f3read/
+└── ...
 ```
 
-You can keep CLI types (shared flags) in a gated module of `f3core` (feature `cli`) or a small helper crate (`f3cli`) and compose per‑tool parsers via `#[command(flatten)]`.
+## Development
 
----
-
-## Development & Testing
-
-```bash
-# lint & format
+``` bash
 cargo fmt
 cargo clippy --workspace --all-targets --all-features -- -D warnings
-
-# tests
 cargo test --workspace
-# show test output live / single-threaded for deterministic logs
-cargo test -p f3core -- --nocapture --test-threads=1
 ```
 
-**Run from workspace (dev):**
+Run the unified CLI:
 
-```bash
-# Writer
-cargo run -p f3write --bin nf3_write -- --help
-
-# Reader
-cargo run -p f3read  --bin nf3_read  -- --help
-cargo run -p f3read  --bin nf3_read  -- .
+``` bash
+cargo run -p nf3 -- write --help
+cargo run -p nf3 -- read --help
+cargo run -p nf3 -- read .
 ```
 
----
+Legacy wrappers:
+
+``` bash
+cargo run -p f3write
+cargo run -p f3read
+```
 
 ## Logging
 
-Use standard `log` macros and initialize one logger once (e.g., `env_logger`):
-
-```bash
-RUST_LOG=debug nf3_read .
+``` bash
+RUST_LOG=debug nf3 read .
 ```
 
----
-
-## License & contributions
+## License
 
 Choose and include a license (`MIT`/`Apache-2.0`/`GPL-3.0` etc.). PRs and issues are welcome. Please keep changes focused, add tests where possible, and run `fmt`/`clippy` before submitting.

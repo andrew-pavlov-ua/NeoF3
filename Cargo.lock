@@ -390,6 +390,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "f3probe"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "f3core",
+]
+
+[[package]]
 name = "f3read"
 version = "0.1.0"
 dependencies = [
@@ -797,6 +805,17 @@ dependencies = [
  "log",
  "wasi 0.11.1+wasi-snapshot-preview1",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "nf3"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "f3core",
+ "f3probe",
+ "f3read",
+ "f3write",
 ]
 
 [[package]]

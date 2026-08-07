@@ -1,5 +1,3 @@
-// f3-write/tests/write_tests.rs
-
 use crate::*;
 
 use f3core::flow::Flow;

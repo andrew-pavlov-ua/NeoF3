@@ -1,0 +1,12 @@
+[package]
+name = "f3probe"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+f3core = { path = "../f3core" }
+clap    = { version = "4.5", features = ["derive"] }
+
+[[bin]]
+name = "nf3_probe"
+path = "src/main.rs"

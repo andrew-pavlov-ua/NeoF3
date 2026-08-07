@@ -1,4 +1,3 @@
-// Standard library imports
 use std::{
     fs::File,
     io::{self, Result},
@@ -6,7 +5,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-// External crate imports
 use crossterm::{
     cursor::MoveToColumn,
     execute,
@@ -15,7 +13,6 @@ use crossterm::{
 };
 // use simple_log::new;
 
-// Internal crate imports
 use crate::utils::{adjust_unit, pr_time_str};
 
 enum State {
