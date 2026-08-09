@@ -7,7 +7,7 @@ edition = "2024"
 clap = { version = "4.5", features = ["derive"] }
 crossterm = "0.29"
 fs = "0.0.5"
-libc = "0.2.175"
+libc = "0.2.176"
 log = "0.4.23"
 simple-log = "2.3.0"
 tempfile = "3.21.0"
